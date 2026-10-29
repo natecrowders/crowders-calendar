@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Event calendar for Crowders Ridge, South Mountain Christian Camp and Crowders Springs.">
+<link rel="preload" href="assets/fonts/AftikaSoft-Light.otf" as="font" type="font/otf" crossorigin>
+<script src="data.js"></script>
+<title>Crowders Camps Master Calendar</title>
+</head>
+<body>
+
+<style>
+@font-face{font-family:'Aftika Soft';src:url('assets/fonts/AftikaSoft-Light.otf') format('opentype');font-weight:300;font-display:swap}
+@font-face{font-family:'Aftika Soft';src:url('assets/fonts/AftikaSoft-Regular.otf') format('opentype');font-weight:400;font-display:swap}
+@font-face{font-family:'Aftika Soft';src:url('assets/fonts/AftikaSoft-SemiBold.otf') format('opentype');font-weight:600;font-display:swap}
+@font-face{font-family:'Aftika Soft';src:url('assets/fonts/AftikaSoft-Bold.otf') format('opentype');font-weight:700;font-display:swap}
+@font-face{font-family:'Aftika Soft';src:url('assets/fonts/AftikaSoft-Black.otf') format('opentype');font-weight:900;font-display:swap}
+/* Layout: gradient-frame header with the camp lockup, then month grids with spanning booking bars (like the facility report), plus a list view. Single light theme on brand cream, by choice. */
+:root{
+  color-scheme:light;
+  --cream:#FBF9F0; --white:#FFFFFF; --ink:#14181A; --ink-700:#3A4145; --ink-500:#68717A; --ink-150:#D7DBDC; --ink-100:#E9EBE9;
+  --ridge:#F8DA02; --ridge-on:#14181A;
+  --smcc:#33B04A; --smcc-on:#14181A;
+  --springs:#1470AF; --springs-on:#FFFFFF;
+  --font:'Aftika Soft',ui-rounded,'Segoe UI',system-ui,sans-serif;
+  --radius-sm:10px; --radius-md:16px; --radius-lg:24px;
+  --shadow-sm:0 1px 2px rgba(20,24,26,.08),0 1px 1px rgba(20,24,26,.04);
+  --shadow-lg:0 16px 40px rgba(20,24,26,.14),0 4px 10px rgba(20,24,26,.08);
+  --frame:linear-gradient(100deg,#F8DA02 15%,#33B04A 50%,#00B7E0 85%);
+}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+[hidden]{display:none!important}
+body{background:var(--cream);color:var(--ink);font-family:var(--font);font-weight:300;font-size:16px;line-height:1.5;padding:16px 16px 48px;margin:0}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+/* header — gradient frame */
+.frame{background:var(--frame);padding:clamp(12px,2.2vw,24px) clamp(14px,3vw,36px);border-radius:var(--radius-md)}
+.panel{background:#FFFFFF;border-radius:var(--radius-sm);padding:clamp(16px,3vw,28px) clamp(16px,3vw,32px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 32px}
+.panel img{height:clamp(34px,5vw,56px);width:auto;max-width:100%}
+.panel .meta{display:flex;flex-direction:column;gap:2px;color:#14181A}
+.panel h1{margin:0;font-weight:900;text-transform:uppercase;letter-spacing:-.02em;line-height:.95;font-size:clamp(24px,3.4vw,38px);text-wrap:balance}
+.panel .meta span{font-weight:400;font-size:14px;opacity:.85}
+/* toolbar */
+.bar{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between}
+.seg{display:inline-flex;background:var(--ink-100);border-radius:999px;padding:4px}
+.seg button{font:700 14px/1 var(--font);border:0;background:transparent;color:var(--ink-700);padding:10px 18px;border-radius:999px;cursor:pointer;text-transform:uppercase;letter-spacing:.04em}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--white)}
+.legend{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:8px;font:600 14px/1 var(--font);padding:8px 14px 8px 10px;border-radius:999px;border:1.5px solid var(--ink-150);background:var(--white);color:var(--ink);cursor:pointer}
+.chip i{width:14px;height:14px;border-radius:50%;display:block}
+.chip[aria-pressed="false"]{opacity:.45}
+.chip[aria-pressed="false"] i{background:transparent!important;box-shadow:inset 0 0 0 2px var(--ink-500)}
+.chip.static{cursor:default}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{font:700 14px/1 var(--font);text-transform:uppercase;letter-spacing:.04em;border:1.5px solid var(--ink-150);background:var(--white);color:var(--ink);padding:11px 18px;border-radius:999px;cursor:pointer}
+.btn.on,.btn[aria-expanded="true"]{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.menu{position:relative}
+.pop{position:absolute;z-index:6;top:calc(100% + 8px);left:0;background:var(--white);border-radius:var(--radius-md);box-shadow:var(--shadow-lg);padding:10px;width:250px;display:flex;flex-direction:column;gap:2px}
+.pop label{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer}
+.pop label:hover{background:var(--ink-100)}
+.pop input{width:18px;height:18px;margin:0;accent-color:#14181A}
+.pop .pa{display:flex;justify-content:space-between;padding:6px 10px 10px;border-bottom:1px solid var(--ink-100);margin-bottom:4px}
+.pop .pa button{font:600 13px/1 var(--font);background:none;border:0;padding:0;color:var(--ink-700);text-decoration:underline;cursor:pointer}
+.pinfo{display:none}
+.swatch-p{background:repeating-linear-gradient(135deg,var(--ink-150) 0 4px,var(--white) 4px 8px)!important;box-shadow:inset 0 0 0 1.5px var(--ink-500)}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+/* months */
+.month{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden}
+.month h2{margin:0;padding:18px 22px 12px;font-weight:900;text-transform:uppercase;letter-spacing:-.01em;font-size:28px;line-height:1;display:flex;align-items:baseline;gap:12px}
+.month h2 small{font-weight:400;font-size:14px;letter-spacing:0;text-transform:none;color:var(--ink-500)}
+.scroll{overflow-x:auto}
+.grid{min-width:760px}
+.dow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--ink-100)}
+.dow div{font:700 12px/1 var(--font);text-transform:uppercase;letter-spacing:.1em;color:var(--ink-500);padding:10px 8px}
+.week{position:relative;border-top:1px solid var(--ink-100);min-height:104px}
+.days{position:absolute;inset:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.days div{border-left:1px solid var(--ink-100)}
+.days div:first-child{border-left:0}
+.days .out{background:repeating-linear-gradient(0deg,#F6F5EE 0 100%)}
+.lanes{position:relative;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));row-gap:4px;padding-bottom:10px}
+.num{grid-row:1;font:700 13px/1 var(--font);padding:9px 8px 4px;color:var(--ink-700);font-variant-numeric:tabular-nums}
+.num.out{color:var(--ink-150)}
+.ev{margin:0 3px;min-width:0;border:0;text-align:left;cursor:pointer;font:inherit;border-radius:8px;padding:5px 9px;display:flex;flex-direction:column;justify-content:flex-start;align-self:start;overflow:hidden;line-height:1.25;transition:transform .12s cubic-bezier(.34,1.56,.64,1)}
+.ev .h{display:flex;align-items:baseline;gap:6px;min-width:0;white-space:nowrap;overflow:hidden}
+.ev:hover{transform:translateY(-1px)}
+.ev:active{transform:scale(.98)}
+.ev .h b{font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;min-width:0}
+.ev .h span{font-weight:400;font-size:12px;overflow:hidden;text-overflow:ellipsis;opacity:.9;flex:1 1 0;min-width:0}
+/* event details inside a bar: one column per day, aligned with the day grid */
+.ev.x{padding:6px 9px 8px}
+.ev .sp{display:block;font-size:11px;line-height:1.3;margin-top:4px;font-weight:400}
+.ev .sp b{font-weight:700}
+.ev .its{display:grid;gap:0 10px;margin-top:4px}
+.ev .day{min-width:0;display:flex;flex-direction:column;gap:2px}
+.it{display:block;font-size:11px;line-height:1.3;font-weight:400;overflow-wrap:anywhere}
+.it u{text-decoration:none;font-weight:700;font-variant-numeric:tabular-nums;margin-right:4px;white-space:nowrap}
+.it small{display:block;font-size:10.5px;opacity:.8}
+.it.pend{font-style:italic}
+.it em{font-style:normal;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-500);margin-left:6px}
+.ev.cl{border-top-left-radius:0;border-bottom-left-radius:0;margin-left:0}
+.ev.cr{border-top-right-radius:0;border-bottom-right-radius:0;margin-right:0}
+.conf-n{background:#14181A}
+.ev.ridge{background:#F8DA02;color:#14181A}
+.ev.ridge.P{background:repeating-linear-gradient(135deg,#FDF0A0 0 6px,#FFFFFF 6px 12px);color:#14181A;box-shadow:inset 0 0 0 1.5px #B99A00}
+.ridge-sw,.chip.ridge i{background:#F8DA02}
+.hd-ridge{background:#F8DA02;color:#14181A}
+.ev.smcc{background:#33B04A;color:#14181A}
+.ev.smcc.P{background:repeating-linear-gradient(135deg,#CDEDD2 0 6px,#FFFFFF 6px 12px);color:#14181A;box-shadow:inset 0 0 0 1.5px #237A2C}
+.smcc-sw,.chip.smcc i{background:#33B04A}
+.hd-smcc{background:#33B04A;color:#14181A}
+.ev.springs{background:#1470AF;color:#FFFFFF}
+.ev.springs.P{background:repeating-linear-gradient(135deg,#C6DDEE 0 6px,#FFFFFF 6px 12px);color:#14181A;box-shadow:inset 0 0 0 1.5px #1470AF}
+.springs-sw,.chip.springs i{background:#1470AF}
+.hd-springs{background:#1470AF;color:#FFFFFF}
+
+/* list */
+.list{display:flex;flex-direction:column;gap:20px}
+.lmonth{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:6px 0 10px}
+.lmonth h2{margin:0;padding:14px 20px 8px;font-weight:900;text-transform:uppercase;font-size:24px}
+.row{display:grid;grid-template-columns:118px minmax(0,1fr) auto;gap:4px 16px;align-items:center;padding:12px 20px;border-top:1px solid var(--ink-100);cursor:pointer;background:none;border-left:0;border-right:0;border-bottom:0;width:100%;text-align:left;font:inherit;color:inherit}
+.row:hover{background:#FAFAF6}
+.li{border-top:1px solid var(--ink-100)}
+.li .row{border-top:0}
+.lsched{padding:0 20px 16px 154px;display:flex;flex-direction:column;gap:10px}
+.lsched .dy{display:grid;grid-template-columns:110px minmax(0,1fr);gap:2px 12px}
+.lsched .dy>b{font-weight:700;font-size:12px;line-height:1.6;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-500)}
+.lsched .dy>div{display:flex;flex-direction:column;gap:4px}
+.lsched .it{font-size:14px;line-height:1.4}
+.lsched .it small{font-size:13px;color:var(--ink-700);opacity:1}
+.sheet .lsched{padding:0 22px 16px}
+.row .d{font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:10px}
+.row .d i{width:12px;height:12px;border-radius:50%;flex:none}
+.row .t{min-width:0}
+.row .t b{display:block;font-weight:700;font-size:16px;line-height:1.25}
+.row .t span{display:block;font-size:14px;color:var(--ink-700)}
+.row .t em{font-style:normal;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-500)}
+.pill{font:700 12px/1 var(--font);text-transform:uppercase;letter-spacing:.06em;padding:6px 10px;border-radius:999px;white-space:nowrap}
+.pill.C{background:var(--ink);color:var(--white)}
+.pill.P{background:var(--white);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink-500)}
+.pill.M{background:var(--ink-100);color:var(--ink)}
+@media (max-width:560px){.row{grid-template-columns:minmax(0,1fr) auto}.row .d{grid-column:1/-1}.lsched{padding-left:20px}.lsched .dy{grid-template-columns:1fr}.pop{width:min(250px,calc(100vw - 32px))}}
+/* detail sheet */
+.scrim{position:fixed;inset:0;background:rgba(20,24,26,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.sheet{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:min(520px,100%);max-height:86vh;overflow:auto}
+.sheet header{padding:20px 22px 16px;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.sheet header em{font-style:normal;font:700 12px/1 var(--font);text-transform:uppercase;letter-spacing:.1em}
+.sheet h3{margin:6px 0 2px;font-weight:900;font-size:26px;line-height:1.05;text-transform:uppercase;letter-spacing:-.01em}
+.sheet header p{margin:0;font-weight:400}
+.sheet dl{margin:0;padding:18px 22px;display:grid;grid-template-columns:auto 1fr;gap:8px 18px}
+.sheet dt{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-500)}
+.sheet dd{margin:0;font-weight:400;font-variant-numeric:tabular-nums}
+.sheet table{width:100%;border-collapse:collapse;font-size:14px}
+.sheet .tw{padding:0 22px 8px}
+.sheet th{text-align:left;font:700 12px/1 var(--font);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-500);padding:8px 0;border-bottom:1px solid var(--ink-150)}
+.sheet td{padding:8px 0;border-bottom:1px solid var(--ink-100);font-weight:400;font-variant-numeric:tabular-nums}
+.sheet td:last-child,.sheet th:last-child{text-align:right}
+.sheet .foot{padding:12px 22px 20px;display:flex;justify-content:flex-end}
+.close{font:700 14px/1 var(--font);text-transform:uppercase;letter-spacing:.04em;background:var(--ink);color:var(--white);border:0;border-radius:999px;padding:12px 22px;cursor:pointer}
+.note{font-size:13px;color:var(--ink-500);font-weight:400}
+@media (prefers-reduced-motion:reduce){.ev{transition:none}}
+
+/* print — keep the brand colors and break by month */
+@media print{
+  @page{size:letter landscape;margin:12mm}
+  html,body{background:#FFFFFF}
+  body{padding:0;font-size:11px}
+  .wrap{max-width:none;gap:14px}
+  .bar,.note{display:none!important}
+  .pinfo{display:block;margin:0;font-size:10px;color:#3A4145}
+  .scrim,.pop{display:none!important}
+  .lmonth{box-shadow:none;border:1px solid #D7DBDC;break-inside:auto}
+  .li{break-inside:avoid}
+  .frame{border-radius:10px}
+  .panel{padding:10px 16px}
+  .panel img{height:30px}
+  .panel h1{font-size:20px}
+  .month{box-shadow:none;border:1px solid #D7DBDC;border-radius:12px}
+  .month h2{font-size:18px;padding:10px 14px 6px}
+  .scroll{overflow:visible}
+  .grid{min-width:0}
+  .week{min-height:0;break-inside:avoid}
+  .month h2,.dow{break-after:avoid;page-break-after:avoid}
+  .dt .week{break-inside:auto}
+  .ev{padding:3px 7px}
+  .ev .h b{font-size:9.5px}
+  .ev .h span{font-size:9px}
+  .ev .it,.ev .sp{font-size:8px}
+  .ev .it small{font-size:7.5px}
+  .num{font-size:9.5px;padding:5px 6px 2px}
+}
+
+</style>
+
+<div class="wrap">
+  <div class="frame"><div class="panel">
+    <img src="assets/logos/lockup-full-color.png" alt="Crowders Camps" width="6919" height="774">
+    <div class="meta"><h1>All Camps</h1><span id="cc-range"></span></div>
+  </div></div>
+
+  <div class="bar">
+    <div class="tools">
+      <div class="seg" role="group" aria-label="View">
+        <button id="v-cal" aria-pressed="true">Calendar</button>
+        <button id="v-list" aria-pressed="false">List</button>
+      </div>
+      <div class="menu">
+        <button class="btn" id="det-btn" aria-expanded="false" aria-controls="det-pop">Event details<span id="det-n"></span></button>
+        <div class="pop" id="det-pop" role="group" aria-label="Event details to show" hidden></div>
+      </div>
+      <button class="btn" id="pdf">Export PDF</button>
+    </div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <p class="pinfo" id="pinfo"></p>
+  <div id="cal" class="list"></div>
+  <div id="lst" class="list" hidden></div>
+  <p class="note"><span id="cc-built"></span> Where several groups hold Student Camp or Kids Camp on the same dates, they show as one event; tap it to see the groups. Solid bars are confirmed, striped bars are pending. Use Event details to show meals, activities and other items; italic items are pending.</p>
+</div>
+<div id="detail" class="scrim" hidden></div>
+
+<script>
+const CAMPS={ridge:{name:"Crowders Ridge",short:"Ridge"},smcc:{name:"South Mountain Christian Camp",short:"South Mountain"},springs:{name:"Crowders Springs",short:"Springs"}};
+const SHOW=["ridge", "smcc", "springs"];
+const EVENTS=CC_DATA.events;
+for(const k of ["range","built"])document.getElementById("cc-"+k).textContent=CC_DATA[k];
+const MASTER=SHOW.length>1;
+const on=new Set(SHOW);
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const D=s=>{const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const key=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const add=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
+const md=d=>(d.getMonth()+1)+"/"+d.getDate();
+const range=e=>e.start===e.end?md(D(e.start)):md(D(e.start))+" – "+md(D(e.end));
+const yrs=e=>{const a=D(e.start).getFullYear(),b=D(e.end).getFullYear();return a===b?a:a+"–"+b};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const STATUS={C:"Confirmed",P:"Pending",M:"Mixed"};
+EVENTS.forEach((e,i)=>e.id=i);
+// Event details: each event's CampWise items, {d:date, t/e:start/end time, x:end date if multi-day, g:type, n:name, c:count, o:notes, p:pending}
+const GROUPS=[["arr", "Arrival & departure"], ["meal", "Meals"], ["prog", "Program"], ["act", "Activities"], ["space", "Meeting spaces"], ["lodge", "Lodging"], ["rent", "Rentals"], ["pkg", "Package"]];
+const GL=Object.fromEntries(GROUPS);
+const P=new URLSearchParams(location.search);
+const det=new Set();
+{let v=P.get("details");if(v==null)try{v=localStorage.getItem("details")}catch(_){}
+ (v||"").split(",").forEach(k=>{if(GL[k])det.add(k)})}
+{const c=(P.get("camp")||"").split(",").filter(c=>SHOW.includes(c));if(c.length){on.clear();c.forEach(x=>on.add(x))}}
+const tm=s=>{if(!s)return"";let[h,m]=s.split(":").map(Number);const ap=h<12?"am":"pm";h=h%12||12;return h+(m?":"+String(m).padStart(2,"0"):"")+ap};
+const tr=i=>i.t?tm(i.t)+(i.e&&i.e!==i.t?"–"+tm(i.e):""):"";
+const isSpan=i=>!!i.x||!i.t||i.t==="00:00";
+const shown=e=>det.size?e.items.filter(i=>det.has(i.g)):[];
+const uniq=a=>[...new Set(a)];
+function spanLine(e,a,notes){return uniq(a.map(i=>esc(i.n)+(i.x&&(i.d!==e.start||i.x!==e.end)?` (${md(D(i.d))}–${md(D(i.x))})`:"")+(notes&&i.o?` (${esc(i.o)})`:""))).join(", ")}
+function sched(e,its,label){
+  const sp=its.filter(isSpan),dl=its.filter(i=>!isSpan(i));let h=`<div class="lsched">`;
+  GROUPS.forEach(([k,l])=>{const a=sp.filter(i=>i.g===k);if(a.length)h+=`<div class="dy"><b>${l}</b><div><span class="it">${spanLine(e,a,true)}</span></div></div>`});
+  uniq(dl.map(i=>i.d)).sort().forEach(d=>{h+=`<div class="dy"><b>${DOW[D(d).getDay()]} ${md(D(d))}</b><div>${dl.filter(i=>i.d===d).map(i=>`<span class="it${i.p?" pend":""}"><u>${tr(i)}</u>${esc(i.n)}${i.c?" · "+i.c:""}${label?`<em>${GL[i.g]}</em>`:""}${i.p?" (pending)":""}${i.o?`<small>${esc(i.o)}</small>`:""}</span>`).join("")}</div></div>`});
+  return h+"</div>";
+}
+
+function visible(){return EVENTS.filter(e=>SHOW.includes(e.camp)&&on.has(e.camp))}
+function monthsSpan(){
+  const ev=EVENTS.filter(e=>SHOW.includes(e.camp));
+  let a=D(ev[0].start),b=D(ev[0].end);
+  ev.forEach(e=>{if(D(e.start)<a)a=D(e.start);if(D(e.end)>b)b=D(e.end)});
+  const out=[];let c=new Date(a.getFullYear(),a.getMonth(),1);
+  while(c<=b){out.push(new Date(c));c=new Date(c.getFullYear(),c.getMonth()+1,1)}
+  return out;
+}
+function spanDays(){const ev=EVENTS.filter(e=>SHOW.includes(e.camp));let a=D(ev[0].start),b=D(ev[0].end);ev.forEach(e=>{if(D(e.start)<a)a=D(e.start);if(D(e.end)>b)b=D(e.end)});return[a,b]}
+function statusLabel(e){
+  if(e.status!=="M")return STATUS[e.status];
+  const c=e.groups.filter(g=>g.status==="C").length;return c+" confirmed, "+(e.groups.length-c)+" pending";
+}
+
+function renderLegend(){
+  const L=document.getElementById("legend");
+  let h="";
+  if(MASTER){SHOW.forEach(c=>h+=`<button class="chip ${c}" aria-pressed="${on.has(c)}" data-camp="${c}"><i></i>${CAMPS[c].short}</button>`)}
+  h+=`<span class="chip static"><i class="${MASTER?"conf-n":SHOW[0]+"-sw"}"></i>Confirmed</span><span class="chip static"><i class="swatch-p"></i>Pending</span>`;
+  L.innerHTML=h;
+  L.querySelectorAll("button.chip").forEach(b=>b.onclick=()=>{const c=b.dataset.camp;on.has(c)?on.delete(c):on.add(c);if(!on.size)on.add(c);renderAll()});
+}
+
+function renderCal(){
+  const ev=visible();let h="";
+  monthsSpan().forEach(m0=>{
+    const mEnd=new Date(m0.getFullYear(),m0.getMonth()+1,0);
+    const n=ev.filter(e=>D(e.start)<=mEnd&&D(e.end)>=m0).length;
+    h+=`<section class="month"><h2>${MONTHS[m0.getMonth()]} ${m0.getFullYear()}<small>${n} ${n===1?"event":"events"}</small></h2><div class="scroll"><div class="grid"><div class="dow">${DOW.map(d=>`<div>${d}</div>`).join("")}</div>`;
+    let ws=add(m0,-m0.getDay());
+    const [fa,fb]=spanDays();
+    while(ws<=mEnd){
+      if(add(ws,6)<fa||ws>fb){ws=add(ws,7);continue}
+      const we=add(ws,6);
+      const segs=ev.filter(e=>D(e.start)<=we&&D(e.end)>=ws).map(e=>{
+        const s=D(e.start)<ws?ws:D(e.start),t=D(e.end)>we?we:D(e.end);
+        return{e,c0:s.getDay()+1,c1:t.getDay()+2,cl:D(e.start)<ws,cr:D(e.end)>we};
+      }).sort((a,b)=>a.c0-b.c0||(b.c1-b.c0)-(a.c1-a.c0)||a.e.camp.localeCompare(b.e.camp));
+      const lanes=[];
+      segs.forEach(s=>{let i=lanes.findIndex(end=>end<=s.c0);if(i<0){i=lanes.length;lanes.push(0)}lanes[i]=s.c1;s.lane=i+2});
+      let days="",nums="";
+      for(let i=0;i<7;i++){const d=add(ws,i),out=d.getMonth()!==m0.getMonth();days+=`<div class="${out?"out":""}"></div>`;nums+=`<div class="num${out?" out":""}" style="grid-column:${i+1}">${d.getDate()===1||i===0?md(d):d.getDate()}</div>`}
+      const bars=segs.map(s=>{
+        const its=shown(s.e);let x="";
+        if(its.length){
+          const sp=s.cl?[]:its.filter(isSpan);
+          GROUPS.forEach(([k,l])=>{const a=sp.filter(i=>i.g===k);if(a.length)x+=`<span class="sp"><b>${l}:</b> ${spanLine(s.e,a,false)}</span>`});
+          let cols="";
+          for(let k=s.c0;k<s.c1;k++){const dk=key(add(ws,k-1));cols+=`<span class="day">${its.filter(i=>!isSpan(i)&&i.d===dk).map(i=>`<span class="it${i.p?" pend":""}"><u>${tm(i.t)}</u>${esc(i.n)}${i.o?`<small>${esc(i.o)}</small>`:""}</span>`).join("")}</span>`}
+          x+=`<span class="its" style="grid-template-columns:repeat(${s.c1-s.c0},minmax(0,1fr))">${cols}</span>`;
+        }
+        return `<button class="ev ${s.e.camp} ${s.e.status==="P"?"P":""} ${s.cl?"cl":""} ${s.cr?"cr":""} ${x?"x":""}" style="grid-column:${s.c0}/${s.c1};grid-row:${s.lane}" data-id="${s.e.id}" title="${esc(s.e.title+" · "+s.e.sub+" · "+range(s.e))}"><span class="h"><b>${esc(s.e.title)}</b><span>${esc(s.e.sub)}</span></span>${x}</button>`;
+      }).join("");
+      h+=`<div class="week"><div class="days">${days}</div><div class="lanes">${nums}${bars}</div></div>`;
+      ws=add(ws,7);
+    }
+    h+=`</div></div></section>`;
+  });
+  document.getElementById("cal").innerHTML=h;
+}
+
+function renderList(){
+  const ev=visible();let h="";
+  monthsSpan().forEach(m0=>{
+    const rows=ev.filter(e=>D(e.start).getMonth()===m0.getMonth()&&D(e.start).getFullYear()===m0.getFullYear());
+    const lab=det.size>1;
+    if(!rows.length)return;
+    h+=`<section class="lmonth"><h2>${MONTHS[m0.getMonth()]} ${m0.getFullYear()}</h2>`;
+    rows.forEach(e=>{const its=shown(e);h+=`<div class="li"><button class="row" data-id="${e.id}"><div class="d"><i class="${e.camp}-sw"></i>${range(e)}</div><div class="t">${MASTER?`<em>${CAMPS[e.camp].short}</em>`:""}<b>${esc(e.title)}</b><span>${esc(e.sub)}${e.att?" · "+e.att+" expected":""}</span></div><span class="pill ${e.status}">${e.status==="M"?"Mixed":STATUS[e.status]}</span></button>${its.length?sched(e,its,lab):""}</div>`});
+    h+=`</section>`;
+  });
+  document.getElementById("lst").innerHTML=h;
+}
+
+let clickY=0;
+function openDetail(id){
+  const e=EVENTS[id],el=document.getElementById("detail");
+  const nights=Math.round((D(e.end)-D(e.start))/864e5);
+  let t="";
+  if(e.groups.length){t=`<div class="tw"><table><thead><tr><th>Group</th><th>Status</th><th>Expected</th></tr></thead><tbody>${e.groups.map(g=>`<tr><td>${esc(g.name)}${g.event!==e.title?` <span class="note">(${esc(g.event)})</span>`:""}</td><td>${STATUS[g.status]}</td><td>${g.att??"–"}</td></tr>`).join("")}</tbody></table></div>`}
+  el.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="dt"><header class="hd-${e.camp}"><em>${CAMPS[e.camp].name}</em><h3 id="dt">${esc(e.title)}</h3><p>${esc(e.sub)}</p></header>
+  <dl><dt>Dates</dt><dd>${range(e)}, ${yrs(e)}${nights?` (${nights} ${nights===1?"night":"nights"})`:""}</dd><dt>Status</dt><dd>${statusLabel(e)}</dd><dt>Expected</dt><dd>${e.att?e.att+" people":"Not listed"}</dd></dl>${t}${e.items.length?sched(e,e.items,true):""}
+  <div class="foot"><button class="close" id="x">Close</button></div></div>`;
+  if(EMBED){el.style.alignItems="flex-start";el.style.paddingTop=Math.max(16,clickY-120)+"px"}
+  el.hidden=false;document.getElementById("x").focus({preventScroll:EMBED});
+  document.getElementById("x").onclick=()=>el.hidden=true;
+}
+const EMBED=window.parent!==window;
+const pop=document.getElementById("det-pop"),dbtn=document.getElementById("det-btn");
+function showPop(v){pop.hidden=!v;dbtn.setAttribute("aria-expanded",v)}
+document.addEventListener("click",ev=>{
+  if(!ev.target.closest(".menu"))showPop(false);
+  const b=ev.target.closest("[data-id]");if(b){clickY=ev.pageY;openDetail(+b.dataset.id)}else if(ev.target.id==="detail")ev.target.hidden=true});
+document.addEventListener("keydown",ev=>{if(ev.key==="Escape"){document.getElementById("detail").hidden=true;showPop(false)}});
+dbtn.onclick=()=>showPop(pop.hidden);
+function detChanged(){
+  try{localStorage.setItem("details",[...det].join(","))}catch(_){}
+  document.body.classList.toggle("dt",det.size>0);document.getElementById("det-n").textContent=det.size?` · ${det.size}`:"";dbtn.classList.toggle("on",det.size>0);
+  pop.querySelectorAll("input").forEach(i=>i.checked=det.has(i.value));
+  renderCal();renderList();renderInfo();
+}
+pop.innerHTML=`<div class="pa"><button data-a="all">Show all</button><button data-a="none">Hide all</button></div>`+GROUPS.map(([k,l])=>`<label><input type="checkbox" value="${k}">${l}</label>`).join("");
+pop.addEventListener("change",e=>{e.target.checked?det.add(e.target.value):det.delete(e.target.value);detChanged()});
+pop.querySelectorAll(".pa button").forEach(b=>b.onclick=()=>{det.clear();if(b.dataset.a==="all")GROUPS.forEach(g=>det.add(g[0]));detChanged()});
+function renderInfo(){document.getElementById("pinfo").textContent=`Camps: ${SHOW.filter(c=>on.has(c)).map(c=>CAMPS[c].short).join(", ")} · Details: ${det.size?GROUPS.filter(g=>det.has(g[0])).map(g=>g[1]).join(", "):"none"} · Printed ${new Date().toLocaleDateString()}`}
+document.getElementById("pdf").onclick=()=>{showPop(false);document.getElementById("detail").hidden=true;window.print()};
+// When embedded in a website, tell the host page how tall the calendar is (see embed.html).
+if(EMBED&&window.ResizeObserver){const post=()=>parent.postMessage({type:"crowders-calendar-height",height:document.documentElement.scrollHeight},"*");new ResizeObserver(post).observe(document.body)}
+
+let view=(window.innerWidth<640)?"list":"cal";
+try{const v=localStorage.getItem("view");if(v)view=v}catch(_){}
+if(["cal","list"].includes(P.get("view")))view=P.get("view");
+function setView(v){view=v;document.getElementById("cal").hidden=v!=="cal";document.getElementById("lst").hidden=v!=="list";document.getElementById("v-cal").setAttribute("aria-pressed",v==="cal");document.getElementById("v-list").setAttribute("aria-pressed",v==="list");try{localStorage.setItem("view",v)}catch(_){}}
+document.getElementById("v-cal").onclick=()=>setView("cal");
+document.getElementById("v-list").onclick=()=>setView("list");
+function renderAll(){renderLegend();renderCal();renderList();renderInfo()}
+renderLegend();setView(view);detChanged();
+</script>
+
+</body>
+</html>
