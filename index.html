@@ -64,6 +64,38 @@ body{background:var(--cream);color:var(--ink);font-family:var(--font);font-weigh
 .pinfo{display:none}
 .swatch-p{background:repeating-linear-gradient(135deg,var(--ink-150) 0 4px,var(--white) 4px 8px)!important;box-shadow:inset 0 0 0 1.5px var(--ink-500)}
 button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+/* search + date range */
+.filters{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:center}
+.srch{position:relative;flex:1 1 280px;min-width:0;display:flex}
+.srch input{width:100%;font:400 15px/1.2 var(--font);color:var(--ink);background:var(--white);border:1.5px solid var(--ink-150);border-radius:999px;padding:11px 16px 11px 40px;-webkit-appearance:none;appearance:none}
+.srch svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--ink-500);pointer-events:none}
+.dates{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.dates label{display:inline-flex;align-items:center;gap:6px;font:700 12px/1 var(--font);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-500)}
+.dates input,.dates select{font:400 14px/1.2 var(--font);color:var(--ink);background:var(--white);border:1.5px solid var(--ink-150);border-radius:999px;padding:9px 12px;min-height:40px}
+.dates select{padding-right:28px}
+.srch input:focus-visible,.dates input:focus-visible,.dates select:focus-visible{outline:3px solid var(--ink);outline-offset:1px}
+.lnk{font:600 14px/1 var(--font);background:none;border:0;padding:8px 4px;color:var(--ink-700);text-decoration:underline;cursor:pointer}
+.count{font-size:14px;font-weight:400;color:var(--ink-700);flex-basis:100%}
+.count b{font-weight:700;color:var(--ink)}
+.it.hit{background:rgba(255,255,255,.92);color:#14181A;border-radius:4px;box-shadow:0 0 0 2px #14181A;padding:0 3px;margin:1px 0}
+.lsched .it.hit{background:#FFF6B8;box-shadow:none;padding:2px 6px}
+.help h4{margin:0 0 6px;font-weight:900;font-size:16px;text-transform:uppercase;letter-spacing:.02em}
+.help section{padding:16px 22px;border-top:1px solid var(--ink-100)}
+.help section:first-of-type{border-top:0}
+.help p,.help li{margin:0 0 6px;font-weight:400;font-size:15px;line-height:1.45}
+.help ol,.help ul{margin:0;padding-left:20px}
+.help kbd{font:700 13px/1 var(--font);background:var(--ink-100);border-radius:6px;padding:3px 7px;white-space:nowrap}
+.help code{font:600 13.5px/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--ink-100);border-radius:6px;padding:1px 6px;overflow-wrap:anywhere}
+.copyrow{display:flex;gap:8px;margin-top:8px}
+.copyrow input{flex:1;min-width:0;font:400 14px/1.2 var(--font);border:1.5px solid var(--ink-150);border-radius:999px;padding:10px 14px;color:var(--ink-700);background:#FAFAF6}
+.copyrow .close{white-space:nowrap}
+.help details summary{cursor:pointer;font-weight:700;font-size:15px}
+.help table{margin-top:10px}
+.help td:last-child,.help th:last-child{text-align:left}
+.help td{vertical-align:top;padding-right:10px}
+.empty{background:var(--white);border-radius:var(--radius-lg);padding:28px 22px;text-align:center;color:var(--ink-700)}
+.empty b{display:block;font-weight:900;text-transform:uppercase;font-size:20px;color:var(--ink);margin-bottom:4px}
+@media (max-width:560px){.dates{width:100%}.dates label{flex:1 1 140px}.dates label input{flex:1;min-width:0}.dates select{flex:1 1 100%}}
 /* months */
 .month{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden}
 .month h2{margin:0;padding:18px 22px 12px;font-weight:900;text-transform:uppercase;letter-spacing:-.01em;font-size:28px;line-height:1;display:flex;align-items:baseline;gap:12px}
@@ -165,7 +197,7 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
   html,body{background:#FFFFFF}
   body{padding:0;font-size:11px}
   .wrap{max-width:none;gap:14px}
-  .bar,.note{display:none!important}
+  .bar,.filters,.note{display:none!important}
   .pinfo{display:block;margin:0;font-size:10px;color:#3A4145}
   .scrim,.pop{display:none!important}
   .lmonth{box-shadow:none;border:1px solid #D7DBDC;break-inside:auto}
@@ -208,14 +240,26 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
         <div class="pop" id="det-pop" role="group" aria-label="Event details to show" hidden></div>
       </div>
       <button class="btn" id="pdf">Export PDF</button>
+      <button class="btn" id="save">Save this view</button>
     </div>
     <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="filters" role="search">
+    <label class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="q" type="search" placeholder="Search events, activities or staff" aria-label="Search events, activities or staff" autocomplete="off" enterkeyhint="search"></label>
+    <div class="dates">
+      <select id="qr" aria-label="Date range"></select>
+      <label>From <input type="date" id="from"></label>
+      <label>To <input type="date" id="to"></label>
+      <button class="lnk" id="clr" hidden>Clear filters</button>
+    </div>
+    <p class="count" id="count" aria-live="polite" hidden></p>
   </div>
 
   <p class="pinfo" id="pinfo"></p>
   <div id="cal" class="list"></div>
   <div id="lst" class="list" hidden></div>
-  <p class="note"><span id="cc-built"></span> Where several groups hold Student Camp or Kids Camp on the same dates, they show as one event; tap it to see the groups. Solid bars are confirmed, striped bars are pending. Use Event details to show meals, activities and other items; italic items are pending.</p>
+  <p class="note"><span id="cc-built"></span> Where several groups hold Student Camp or Kids Camp on the same dates, they show as one event; tap it to see the groups. Solid bars are confirmed, striped bars are pending. Use Event details to show meals, activities and other items; italic items are pending. Search finds events, groups, activities and staff, and outlines the matching items.</p>
 </div>
 <div id="detail" class="scrim" hidden></div>
 
@@ -238,7 +282,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 const STATUS={C:"Confirmed",P:"Pending",M:"Mixed"};
 EVENTS.forEach((e,i)=>e.id=i);
 // Event details: each event's CampWise items, {d:date, t/e:start/end time, x:end date if multi-day, g:type, n:name, c:count, o:notes, p:pending}
-const GROUPS=[["arr", "Arrival & departure"], ["meal", "Meals"], ["prog", "Program"], ["act", "Activities"], ["space", "Meeting spaces"], ["lodge", "Lodging"], ["rent", "Rentals"], ["pkg", "Package"]];
+const GROUPS=[["arr", "Arrival & departure"], ["meal", "Meals"], ["prog", "Program"], ["act", "Activities"], ["space", "Meeting spaces"], ["lodge", "Lodging"], ["rent", "Rentals"], ["pkg", "Package"], ["ops", "Staff & operations"], ["poc", "Staff contact"]];
 const GL=Object.fromEntries(GROUPS);
 const P=new URLSearchParams(location.search);
 const det=new Set();
@@ -248,21 +292,29 @@ const det=new Set();
 const tm=s=>{if(!s)return"";let[h,m]=s.split(":").map(Number);const ap=h<12?"am":"pm";h=h%12||12;return h+(m?":"+String(m).padStart(2,"0"):"")+ap};
 const tr=i=>i.t?tm(i.t)+(i.e&&i.e!==i.t?"–"+tm(i.e):""):"";
 const isSpan=i=>!!i.x||!i.t||i.t==="00:00";
-const shown=e=>det.size?e.items.filter(i=>det.has(i.g)):[];
+// Search and date range: F.q is the search text, F.from/F.to are YYYY-MM-DD or "".
+const F={q:"",from:"",to:""};
+let QT=[];
+const low=s=>String(s||"").toLowerCase();
+const itemText=i=>low(i.n+" "+(i.o||"")+" "+(GL[i.g]||""));
+const itemHit=i=>QT.length&&QT.some(w=>itemText(i).includes(w));
+const icl=i=>"it"+(i.p?" pend":"")+(itemHit(i)?" hit":"");
+const shown=e=>det.size||QT.length?e.items.filter(i=>det.has(i.g)||itemHit(i)):[];
+// Everything searchable about an event, lower-cased once.
+EVENTS.forEach(e=>e.hay=low([e.title,e.sub,CAMPS[e.camp].name,CAMPS[e.camp].short,STATUS[e.status]].concat(e.groups.map(g=>g.name+" "+g.event)).join(" ")+" "+e.items.map(itemText).join(" ")));
 const uniq=a=>[...new Set(a)];
-function spanLine(e,a,notes){return uniq(a.map(i=>esc(i.n)+(i.x&&(i.d!==e.start||i.x!==e.end)?` (${md(D(i.d))}–${md(D(i.x))})`:"")+(notes&&i.o?` (${esc(i.o)})`:""))).join(", ")}
+function spanLine(e,a,notes){return uniq(a.map(i=>esc(i.n||(notes?"":i.o||""))+(i.x&&(i.d!==e.start||i.x!==e.end)?` (${md(D(i.d))}–${md(D(i.x))})`:"")+(notes&&i.o?` (${esc(i.o)})`:""))).join(", ")}
 function sched(e,its,label){
   const sp=its.filter(isSpan),dl=its.filter(i=>!isSpan(i));let h=`<div class="lsched">`;
   GROUPS.forEach(([k,l])=>{const a=sp.filter(i=>i.g===k);if(a.length)h+=`<div class="dy"><b>${l}</b><div><span class="it">${spanLine(e,a,true)}</span></div></div>`});
-  uniq(dl.map(i=>i.d)).sort().forEach(d=>{h+=`<div class="dy"><b>${DOW[D(d).getDay()]} ${md(D(d))}</b><div>${dl.filter(i=>i.d===d).map(i=>`<span class="it${i.p?" pend":""}"><u>${tr(i)}</u>${esc(i.n)}${i.c?" · "+i.c:""}${label?`<em>${GL[i.g]}</em>`:""}${i.p?" (pending)":""}${i.o?`<small>${esc(i.o)}</small>`:""}</span>`).join("")}</div></div>`});
+  uniq(dl.map(i=>i.d)).sort().forEach(d=>{h+=`<div class="dy"><b>${DOW[D(d).getDay()]} ${md(D(d))}</b><div>${dl.filter(i=>i.d===d).map(i=>`<span class="${icl(i)}"><u>${tr(i)}</u>${esc(i.n)}${i.c?" · "+i.c:""}${label?`<em>${GL[i.g]}</em>`:""}${i.p?" (pending)":""}${i.o?`<small>${esc(i.o)}</small>`:""}</span>`).join("")}</div></div>`});
   return h+"</div>";
 }
 
-function visible(){return EVENTS.filter(e=>SHOW.includes(e.camp)&&on.has(e.camp))}
+function visible(){const[a,b]=bounds();return EVENTS.filter(e=>SHOW.includes(e.camp)&&on.has(e.camp)&&D(e.end)>=a&&D(e.start)<=b&&QT.every(w=>e.hay.includes(w)))}
+function bounds(){let[a,b]=spanDays();if(F.from&&D(F.from)>a)a=D(F.from);if(F.to&&D(F.to)<b)b=D(F.to);return[a,b]}
 function monthsSpan(){
-  const ev=EVENTS.filter(e=>SHOW.includes(e.camp));
-  let a=D(ev[0].start),b=D(ev[0].end);
-  ev.forEach(e=>{if(D(e.start)<a)a=D(e.start);if(D(e.end)>b)b=D(e.end)});
+  const[a,b]=bounds();
   const out=[];let c=new Date(a.getFullYear(),a.getMonth(),1);
   while(c<=b){out.push(new Date(c));c=new Date(c.getFullYear(),c.getMonth()+1,1)}
   return out;
@@ -287,9 +339,10 @@ function renderCal(){
   monthsSpan().forEach(m0=>{
     const mEnd=new Date(m0.getFullYear(),m0.getMonth()+1,0);
     const n=ev.filter(e=>D(e.start)<=mEnd&&D(e.end)>=m0).length;
+    if(!n&&QT.length)return;
     h+=`<section class="month"><h2>${MONTHS[m0.getMonth()]} ${m0.getFullYear()}<small>${n} ${n===1?"event":"events"}</small></h2><div class="scroll"><div class="grid"><div class="dow">${DOW.map(d=>`<div>${d}</div>`).join("")}</div>`;
     let ws=add(m0,-m0.getDay());
-    const [fa,fb]=spanDays();
+    const [fa,fb]=bounds();
     while(ws<=mEnd){
       if(add(ws,6)<fa||ws>fb){ws=add(ws,7);continue}
       const we=add(ws,6);
@@ -307,7 +360,7 @@ function renderCal(){
           const sp=s.cl?[]:its.filter(isSpan);
           GROUPS.forEach(([k,l])=>{const a=sp.filter(i=>i.g===k);if(a.length)x+=`<span class="sp"><b>${l}:</b> ${spanLine(s.e,a,false)}</span>`});
           let cols="";
-          for(let k=s.c0;k<s.c1;k++){const dk=key(add(ws,k-1));cols+=`<span class="day">${its.filter(i=>!isSpan(i)&&i.d===dk).map(i=>`<span class="it${i.p?" pend":""}"><u>${tm(i.t)}</u>${esc(i.n)}${i.o?`<small>${esc(i.o)}</small>`:""}</span>`).join("")}</span>`}
+          for(let k=s.c0;k<s.c1;k++){const dk=key(add(ws,k-1));cols+=`<span class="day">${its.filter(i=>!isSpan(i)&&i.d===dk).map(i=>`<span class="${icl(i)}"><u>${tm(i.t)}</u>${esc(i.n)}${i.o?`<small>${esc(i.o)}</small>`:""}</span>`).join("")}</span>`}
           x+=`<span class="its" style="grid-template-columns:repeat(${s.c1-s.c0},minmax(0,1fr))">${cols}</span>`;
         }
         return `<button class="ev ${s.e.camp} ${s.e.status==="P"?"P":""} ${s.cl?"cl":""} ${s.cr?"cr":""} ${x?"x":""}" style="grid-column:${s.c0}/${s.c1};grid-row:${s.lane}" data-id="${s.e.id}" title="${esc(s.e.title+" · "+s.e.sub+" · "+range(s.e))}"><span class="h"><b>${esc(s.e.title)}</b><span>${esc(s.e.sub)}</span></span>${x}</button>`;
@@ -317,20 +370,21 @@ function renderCal(){
     }
     h+=`</div></div></section>`;
   });
-  document.getElementById("cal").innerHTML=h;
+  document.getElementById("cal").innerHTML=h||emptyMsg();
 }
 
 function renderList(){
   const ev=visible();let h="";
   monthsSpan().forEach(m0=>{
-    const rows=ev.filter(e=>D(e.start).getMonth()===m0.getMonth()&&D(e.start).getFullYear()===m0.getFullYear());
+    const first=bounds()[0],rows=ev.filter(e=>{const s=D(e.start)<first?first:D(e.start);return s.getMonth()===m0.getMonth()&&s.getFullYear()===m0.getFullYear()});
     const lab=det.size>1;
     if(!rows.length)return;
     h+=`<section class="lmonth"><h2>${MONTHS[m0.getMonth()]} ${m0.getFullYear()}</h2>`;
     rows.forEach(e=>{const its=shown(e);h+=`<div class="li"><button class="row" data-id="${e.id}"><div class="d"><i class="${e.camp}-sw"></i>${range(e)}</div><div class="t">${MASTER?`<em>${CAMPS[e.camp].short}</em>`:""}<b>${esc(e.title)}</b><span>${esc(e.sub)}${e.att?" · "+e.att+" expected":""}</span></div><span class="pill ${e.status}">${e.status==="M"?"Mixed":STATUS[e.status]}</span></button>${its.length?sched(e,its,lab):""}</div>`});
     h+=`</section>`;
   });
-  document.getElementById("lst").innerHTML=h;
+  document.getElementById("lst").innerHTML=h||emptyMsg();
+  renderCount(ev.length);
 }
 
 let clickY=0;
@@ -358,12 +412,12 @@ function detChanged(){
   try{localStorage.setItem("details",[...det].join(","))}catch(_){}
   document.body.classList.toggle("dt",det.size>0);document.getElementById("det-n").textContent=det.size?` · ${det.size}`:"";dbtn.classList.toggle("on",det.size>0);
   pop.querySelectorAll("input").forEach(i=>i.checked=det.has(i.value));
-  renderCal();renderList();renderInfo();
+  renderCal();renderList();renderInfo();syncURL();
 }
 pop.innerHTML=`<div class="pa"><button data-a="all">Show all</button><button data-a="none">Hide all</button></div>`+GROUPS.map(([k,l])=>`<label><input type="checkbox" value="${k}">${l}</label>`).join("");
 pop.addEventListener("change",e=>{e.target.checked?det.add(e.target.value):det.delete(e.target.value);detChanged()});
 pop.querySelectorAll(".pa button").forEach(b=>b.onclick=()=>{det.clear();if(b.dataset.a==="all")GROUPS.forEach(g=>det.add(g[0]));detChanged()});
-function renderInfo(){document.getElementById("pinfo").textContent=`Camps: ${SHOW.filter(c=>on.has(c)).map(c=>CAMPS[c].short).join(", ")} · Details: ${det.size?GROUPS.filter(g=>det.has(g[0])).map(g=>g[1]).join(", "):"none"} · Printed ${new Date().toLocaleDateString()}`}
+function renderInfo(){document.getElementById("pinfo").textContent=`Camps: ${SHOW.filter(c=>on.has(c)).map(c=>CAMPS[c].short).join(", ")} · Details: ${det.size?GROUPS.filter(g=>det.has(g[0])).map(g=>g[1]).join(", "):"none"} ${F.from||F.to?` · Dates: ${F.from?md(D(F.from))+"/"+D(F.from).getFullYear():"start"} – ${F.to?md(D(F.to))+"/"+D(F.to).getFullYear():"end"}`:""}${F.q?` · Search: \u201c${F.q}\u201d`:""} · Printed ${new Date().toLocaleDateString()}`}
 document.getElementById("pdf").onclick=()=>{showPop(false);document.getElementById("detail").hidden=true;window.print()};
 // When embedded in a website, tell the host page how tall the calendar is (see embed.html).
 if(EMBED&&window.ResizeObserver){const post=()=>parent.postMessage({type:"crowders-calendar-height",height:document.documentElement.scrollHeight},"*");new ResizeObserver(post).observe(document.body)}
@@ -371,10 +425,95 @@ if(EMBED&&window.ResizeObserver){const post=()=>parent.postMessage({type:"crowde
 let view=(window.innerWidth<640)?"list":"cal";
 try{const v=localStorage.getItem("view");if(v)view=v}catch(_){}
 if(["cal","list"].includes(P.get("view")))view=P.get("view");
-function setView(v){view=v;document.getElementById("cal").hidden=v!=="cal";document.getElementById("lst").hidden=v!=="list";document.getElementById("v-cal").setAttribute("aria-pressed",v==="cal");document.getElementById("v-list").setAttribute("aria-pressed",v==="list");try{localStorage.setItem("view",v)}catch(_){}}
+function setView(v){view=v;document.getElementById("cal").hidden=v!=="cal";document.getElementById("lst").hidden=v!=="list";document.getElementById("v-cal").setAttribute("aria-pressed",v==="cal");document.getElementById("v-list").setAttribute("aria-pressed",v==="list");try{localStorage.setItem("view",v)}catch(_){}syncURL()}
 document.getElementById("v-cal").onclick=()=>setView("cal");
 document.getElementById("v-list").onclick=()=>setView("list");
-function renderAll(){renderLegend();renderCal();renderList();renderInfo()}
+function renderAll(){renderLegend();renderCal();renderList();renderInfo();syncURL()}
+function emptyMsg(){return `<div class="empty"><b>No events found</b>Try a different search or a wider date range.</div>`}
+function renderCount(n){
+  const c=document.getElementById("count"),act=!!(F.q||F.from||F.to);
+  c.hidden=!act;document.getElementById("clr").hidden=!act;
+  if(act)c.innerHTML=`Showing <b>${n}</b> ${n===1?"event":"events"}${F.q?` matching \u201c${esc(F.q)}\u201d`:""}${F.from||F.to?` between ${F.from?md(D(F.from))+"/"+D(F.from).getFullYear():"the start"} and ${F.to?md(D(F.to))+"/"+D(F.to).getFullYear():"the end"}`:""}`;
+}
+let qTimer;
+const qEl=document.getElementById("q"),fEl=document.getElementById("from"),tEl=document.getElementById("to"),rEl=document.getElementById("qr");
+// Quick ranges, worked out from today and the years the calendar covers.
+const RANGES=(()=>{
+  const t=new Date(),td=key(t),[a,b]=spanDays(),r=[["","All dates"]];
+  r.push([`${td}|${key(new Date(t.getFullYear(),t.getMonth()+1,0))}`,"This month"]);
+  r.push([`${key(new Date(t.getFullYear(),t.getMonth()+1,1))}|${key(new Date(t.getFullYear(),t.getMonth()+2,0))}`,"Next month"]);
+  r.push([`${td}|${key(add(t,30))}`,"Next 30 days"]);
+  r.push([`${td}|${key(add(t,90))}`,"Next 90 days"]);
+  r.push([`${td}|`,"Today onward"]);
+  for(let y=a.getFullYear();y<=b.getFullYear();y++){
+    if(new Date(y,7,31)>=a&&new Date(y,5,1)<=b)r.push([`${y}-06-01|${y}-08-31`,`Summer ${y}`]);
+    r.push([`${y}-01-01|${y}-12-31`,String(y)]);
+  }
+  r.push(["custom","Custom dates"]);
+  return r;
+})();
+rEl.innerHTML=RANGES.map(([v,l])=>`<option value="${v}"${v==="custom"?" hidden":""}>${l}</option>`).join("");
+{const[a,b]=spanDays();fEl.min=tEl.min=key(a);fEl.max=tEl.max=key(b)}
+const okDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(s||"")?s:"";
+function syncInputs(){
+  fEl.value=F.from;tEl.value=F.to;
+  const v=F.from||F.to?F.from+"|"+F.to:"";rEl.value=RANGES.some(r=>r[0]===v)?v:"custom";
+}
+function applyFilters(){
+  clearTimeout(qTimer);F.q=qEl.value.trim();
+  QT=low(F.q).split(/\s+/).filter(Boolean);
+  renderCal();renderList();renderInfo();syncURL();
+}
+qEl.addEventListener("input",()=>{clearTimeout(qTimer);qTimer=setTimeout(applyFilters,150)});
+rEl.onchange=()=>{if(rEl.value==="custom")return;const[f,t]=(rEl.value||"|").split("|");F.from=f;F.to=t;syncInputs();applyFilters()};
+const dateChanged=()=>{F.from=okDate(fEl.value);F.to=okDate(tEl.value);if(F.from&&F.to&&F.to<F.from){[F.from,F.to]=[F.to,F.from]}syncInputs();applyFilters()};
+fEl.onchange=dateChanged;tEl.onchange=dateChanged;
+document.getElementById("clr").onclick=()=>{qEl.value="";F.from="";F.to="";syncInputs();applyFilters();qEl.focus()};
+F.q=(P.get("q")||"").trim();F.from=okDate(P.get("from"));F.to=okDate(P.get("to"));
+qEl.value=F.q;QT=low(F.q).split(/\s+/).filter(Boolean);syncInputs();
+// Every setting lives in the page address, so a bookmark or a shared link opens this exact view.
+const SITE="https://natecrowders.github.io/crowders-calendar/";
+function viewParams(){
+  const s=[];s.push("view="+view);
+  if(MASTER&&on.size<SHOW.length)s.push("camp="+SHOW.filter(c=>on.has(c)).join(","));
+  if(det.size)s.push("details="+GROUPS.map(g=>g[0]).filter(k=>det.has(k)).join(","));
+  if(F.q)s.push("q="+encodeURIComponent(F.q).replace(/%20/g,"+"));
+  if(F.from)s.push("from="+F.from);if(F.to)s.push("to="+F.to);
+  return s.join("&");
+}
+function syncURL(){try{history.replaceState(null,"",location.pathname+"?"+viewParams()+location.hash)}catch(_){}}
+// The public website is the page people can open from a link; inside Claude or another site's frame, point to it.
+const PUB=typeof window.CC_DATA!=="undefined"&&!EMBED;
+const shareURL=()=>(PUB?location.origin+location.pathname:SITE)+"?"+viewParams();
+function openHelp(){
+  showPop(false);
+  const el=document.getElementById("detail"),link=shareURL(),mac=/Mac|iPhone|iPad/.test(navigator.platform||navigator.userAgent);
+  const ex=(k,l)=>`<tr><td>${l}</td><td><code>${k}</code></td></tr>`;
+  el.innerHTML=`<div class="sheet help" role="dialog" aria-modal="true" aria-labelledby="ht"><header class="hd-${MASTER?"ridge":SHOW[0]}"><em>Calendar help</em><h3 id="ht">Save this view</h3><p>Set the calendar up once, then save it so it opens the same way every time.</p></header>
+  <section><h4>1. Set it up</h4><p>Pick your camps, Calendar or List, Event details, a search and dates. Then open Save this view again to get a link to exactly that.</p></section>
+  <section><h4>2. Copy your link</h4><p>Paste it into an email or text, or keep it for yourself. Anyone who opens it sees this exact view.</p>
+   <div class="copyrow"><input id="hl" readonly value="${esc(link)}" aria-label="Link to this view"><button class="close" id="hc">Copy link</button></div>${PUB?"":`<p class="note" style="margin-top:8px">This link opens the public calendar on the website.</p>`}</section>
+  <section><h4>3. Or bookmark it</h4><ul><li><b>Computer:</b> open the link, then press <kbd>${mac?"⌘ Cmd":"Ctrl"}</kbd> + <kbd>D</kbd> and click Done.</li><li><b>iPhone:</b> open the link in Safari, tap the Share button (the square with an arrow), then <b>Add Bookmark</b> or <b>Add to Home Screen</b>.</li><li><b>Android:</b> open the link in Chrome, tap the three dots at the top right, then the star.</li></ul></section>
+  <section><details><summary>Make a link by hand</summary>
+   <p style="margin-top:10px">Start with the calendar address, add a <code>?</code>, then add any of these settings. Put <code>&amp;</code> between settings.</p>
+   <table><thead><tr><th>To show</th><th>Add</th></tr></thead><tbody>
+   ${MASTER?ex("camp=ridge","Only Crowders Ridge")+ex("camp=smcc","Only South Mountain")+ex("camp=springs","Only Crowders Springs")+ex("camp=ridge,springs","Two camps"):""}
+   ${ex("view=list","The List view")}${ex("view=cal","The Calendar view")}
+   ${ex("q=Paetyn","A search (use + for spaces, like q=giant+swing)")}
+   ${ex("from=2027-06-01&amp;to=2027-08-31","Dates (year-month-day)")}
+   ${ex("details=meal,act","Event details, separated by commas")}
+   </tbody></table>
+   <p style="margin-top:10px">Event details you can use: ${GROUPS.map(([k,l])=>`<code>${k}</code> ${esc(l)}`).join(", ")}.</p>
+   <p>Example: <code>${esc(SITE)}?camp=ridge&amp;view=list&amp;from=2027-06-01&amp;to=2027-08-31</code></p>
+  </details></section>
+  <div class="foot"><button class="close" id="x">Close</button></div></div>`;
+  if(EMBED){el.style.alignItems="flex-start";el.style.paddingTop=Math.max(16,clickY-120)+"px"}
+  el.hidden=false;const hc=document.getElementById("hc"),hl=document.getElementById("hl");
+  hc.onclick=async()=>{let ok=false;try{await navigator.clipboard.writeText(link);ok=true}catch(_){hl.focus();hl.select();try{ok=document.execCommand("copy")}catch(_){}}hc.textContent=ok?"Copied":"Press Ctrl+C";setTimeout(()=>hc.textContent="Copy link",2000)};
+  hl.onfocus=()=>hl.select();
+  document.getElementById("x").onclick=()=>el.hidden=true;hc.focus({preventScroll:EMBED});
+}
+document.getElementById("save").onclick=e=>{clickY=e.pageY;openHelp()};
 renderLegend();setView(view);detChanged();
 </script>
 
